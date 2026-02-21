@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Scale, BookOpen, Users, GraduationCap, ShoppingBag, MessageSquare, Megaphone, Settings, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lssLogo from "@/assets/lss-logo.png";
 
@@ -9,14 +9,14 @@ const Header = () => {
   const location = useLocation();
 
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Resources", path: "/resources" },
-    { name: "Executives", path: "/executives" },
-    { name: "Alumni", path: "/alumni" },
-    { name: "Merch", path: "/merch" },
-    { name: "News", path: "/news" },
-    { name: "Admin", path: "/admin" },
-    { name: "Contact", path: "/contact" },
+    { name: "Home", path: "/", icon: Scale },
+    { name: "Resources", path: "/resources", icon: BookOpen },
+    { name: "Executives", path: "/executives", icon: Users },
+    { name: "Alumni", path: "/alumni", icon: GraduationCap },
+    { name: "Merch", path: "/merch", icon: ShoppingBag },
+    { name: "News", path: "/news", icon: Megaphone },
+    { name: "Admin", path: "/admin", icon: Settings },
+    { name: "Contact", path: "/contact", icon: Mail },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -43,30 +43,36 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:gap-1.5">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`relative rounded-full px-3.5 py-2 text-sm font-medium tracking-wide transition-bounce hover:text-primary ${
-                  isActive(link.path)
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                }`}
-              >
-                <span
-                  className={`absolute inset-0 -z-10 rounded-full transition-smooth ${
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`relative rounded-full px-3.5 py-2 text-sm font-medium tracking-wide transition-bounce hover:text-primary flex items-center gap-2 ${
                     isActive(link.path)
-                      ? "bg-primary/12 shadow-inner-glow"
-                      : "opacity-0 group-hover:opacity-100"
+                      ? "text-primary"
+                      : "text-muted-foreground"
                   }`}
-                />
-                {link.name}
-                <span className="absolute left-3 right-3 top-[90%] h-px origin-center scale-x-0 bg-primary/40 transition-transform duration-300 ease-out group-hover:scale-x-100" />
-              </Link>
-            ))}
-            <Button variant="gold" size="sm" asChild className="ml-2 shadow-gold">
-              <Link to="/feedback">Share Feedback</Link>
-            </Button>
+                >
+                  <Icon className="h-4 w-4" />
+                  <span
+                    className={`absolute inset-0 -z-10 rounded-full transition-smooth ${
+                      isActive(link.path)
+                        ? "bg-primary/12 shadow-inner-glow"
+                        : "opacity-0 group-hover:opacity-100"
+                    }`}
+                  />
+                  {link.name}
+                  <span className="absolute left-3 right-3 top-[90%] h-px origin-center scale-x-0 bg-primary/40 transition-transform duration-300 ease-out group-hover:scale-x-100" />
+                </Link>
+              );
+            })}
+            <div className="ml-2">
+              <Button variant="gold" size="sm" asChild className="shadow-gold">
+                <Link to="/feedback">Share Feedback</Link>
+              </Button>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -87,26 +93,32 @@ const Header = () => {
         >
           <div className="mt-2 rounded-2xl border border-border/50 bg-card/90 p-4 shadow-floating-card">
             <div className="space-y-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block rounded-xl px-4 py-3 text-sm font-medium transition-bounce ${
-                    isActive(link.path)
-                      ? "bg-primary/10 text-primary shadow-inner-glow"
-                      : "text-muted-foreground hover:bg-primary/8 hover:text-primary"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-bounce ${
+                      isActive(link.path)
+                        ? "bg-primary/10 text-primary shadow-inner-glow"
+                        : "text-muted-foreground hover:bg-primary/8 hover:text-primary"
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />
+                    {link.name}
+                  </Link>
+                );
+              })}
             </div>
-            <Button variant="gold" size="sm" className="mt-4 w-full shadow-gold" asChild>
-              <Link to="/feedback" onClick={() => setMobileMenuOpen(false)}>
-                Share Feedback
-              </Link>
-            </Button>
+            <div className="mt-4">
+              <Button variant="gold" size="sm" className="w-full shadow-gold" asChild>
+                <Link to="/feedback" onClick={() => setMobileMenuOpen(false)}>
+                  Share Feedback
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </nav>

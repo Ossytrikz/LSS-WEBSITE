@@ -1,185 +1,189 @@
+import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Star } from "lucide-react";
+import { ShoppingBag, Star, ArrowRight } from "lucide-react";
+import { useAdminData } from "@/context/AdminDataContextSupabase";
 
 const Merch = () => {
-  // Sample data - will be replaced with backend
-  const products = [
-    {
-      id: 1,
-      name: "LSS Official T-Shirt",
-      price: "₦5,000",
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop",
-      sizes: ["S", "M", "L", "XL", "XXL"],
-      description: "Premium quality cotton t-shirt with LSS logo",
-      inStock: true,
-    },
-    {
-      id: 2,
-      name: "LSS Hoodie",
-      price: "₦12,000",
-      image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&h=500&fit=crop",
-      sizes: ["M", "L", "XL"],
-      description: "Warm and comfortable hoodie for all seasons",
-      inStock: true,
-    },
-    {
-      id: 3,
-      name: "LSS Cap",
-      price: "₦3,500",
-      image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500&h=500&fit=crop",
-      sizes: ["One Size"],
-      description: "Stylish cap with embroidered LSS logo",
-      inStock: true,
-    },
-    {
-      id: 4,
-      name: "LSS Polo Shirt",
-      price: "₦7,500",
-      image: "https://images.unsplash.com/photo-1626497764746-6dc36546b388?w=500&h=500&fit=crop",
-      sizes: ["S", "M", "L", "XL"],
-      description: "Professional polo shirt perfect for formal events",
-      inStock: true,
-    },
-    {
-      id: 5,
-      name: "LSS Notebook & Pen Set",
-      price: "₦4,000",
-      image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=500&h=500&fit=crop",
-      sizes: ["Standard"],
-      description: "Quality stationery set for your law studies",
-      inStock: false,
-    },
-    {
-      id: 6,
-      name: "LSS Water Bottle",
-      price: "₦2,500",
-      image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=500&h=500&fit=crop",
-      sizes: ["500ml"],
-      description: "Eco-friendly water bottle with LSS branding",
-      inStock: true,
-    },
-  ];
+  const { merchItems, loading } = useAdminData();
+
+  const formatPrice = (price: string) => {
+    return `₦${price}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const featuredItems = merchItems.slice(0, 3);
+  const otherItems = merchItems.slice(3);
 
   return (
-    <div className="min-h-screen py-12">
+    <div className="min-h-screen py-8 md:py-12">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-4">
-            <div className="p-4 rounded-full bg-accent/10">
-              <ShoppingBag className="h-8 w-8 text-accent" />
+        <div className="text-center mb-8 md:mb-12">
+          <div className="inline-flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="p-2 md:p-3 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-xl shadow-lg">
+              <ShoppingBag className="h-5 w-5 md:h-6 md:w-6 text-white" />
+            </div>
+            <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+              LSS Merchandise
+            </h1>
+          </div>
+          <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto px-2">
+            Get your official LSS branded items and support our community
+          </p>
+        </div>
+
+        {/* Featured Products */}
+        {featuredItems.length > 0 && (
+          <div className="mb-8 md:mb-12">
+            <h2 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-6 md:mb-8 text-center">
+              Featured Products
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+              {featuredItems.map((item) => (
+                <Link key={item.id} to={`/merch/${item.id}`}>
+                  <Card className="overflow-hidden shadow-elegant hover:shadow-gold transition-smooth border-0 group h-full">
+                    <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                      />
+                      {!item.in_stock && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <div className="text-center">
+                            <ShoppingBag className="h-10 w-10 md:h-12 md:w-12 text-white mx-auto mb-2" />
+                            <p className="text-white text-lg md:text-xl font-bold">Out of Stock</p>
+                          </div>
+                        </div>
+                      )}
+                      <div className="absolute top-3 right-3 md:top-4 md:right-4">
+                        <Badge className={item.in_stock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                          {item.in_stock ? "In Stock" : "Out of Stock"}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="p-4 md:p-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="font-serif text-lg md:text-xl font-bold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                          {item.name}
+                        </h3>
+                        <div className="text-right">
+                          <div className="text-xl md:text-2xl font-bold text-primary">
+                            {formatPrice(item.price)}
+                          </div>
+                          <div className="flex items-center gap-1 mt-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-3 w-3 md:h-4 md:w-4 ${
+                                  i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                        {item.description}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-muted-foreground">
+                          {item.sizes && item.sizes.length > 0 && `Available sizes: ${item.sizes.join(", ")}`}
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          className="p-0 h-auto text-primary hover:bg-transparent group"
+                        >
+                          View Details 
+                          <span className="ml-1 group-hover:translate-x-1 transition-transform duration-300">→</span>
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
             </div>
           </div>
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">
-            LSS Official Merchandise
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Show your LSS pride with our exclusive collection of high-quality merchandise
-          </p>
-        </div>
+        )}
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product) => (
-            <Card key={product.id} className="overflow-hidden shadow-elegant hover:shadow-gold transition-smooth border-0 gradient-card">
-              {/* Product Image */}
-              <div className="relative h-72 overflow-hidden bg-muted">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                />
-                {!product.inStock && (
-                  <div className="absolute inset-0 bg-foreground/60 flex items-center justify-center">
-                    <span className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg font-semibold">
-                      Out of Stock
-                    </span>
-                  </div>
-                )}
-                {product.inStock && (
-                  <div className="absolute top-4 right-4 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 shadow-gold">
-                    <Star className="h-3 w-3 fill-current" />
-                    New
-                  </div>
-                )}
-              </div>
-
-              {/* Product Info */}
-              <div className="p-6">
-                <h3 className="font-serif text-xl font-bold text-foreground mb-2">
-                  {product.name}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {product.description}
-                </p>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Price:</span>
-                    <span className="text-xl font-bold text-accent">{product.price}</span>
-                  </div>
-                  
-                  <div className="flex items-start justify-between">
-                    <span className="text-sm text-muted-foreground">Sizes:</span>
-                    <div className="flex flex-wrap gap-1 justify-end">
-                      {product.sizes.map((size) => (
-                        <span key={size} className="px-2 py-1 bg-muted rounded text-xs font-medium">
-                          {size}
-                        </span>
-                      ))}
+        {/* All Products Grid */}
+        {otherItems.length > 0 && (
+          <div>
+            <h2 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-6 md:mb-8 text-center">
+              All Products
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {otherItems.map((item) => (
+                <Link key={item.id} to={`/merch/${item.id}`}>
+                  <Card className="overflow-hidden shadow-elegant hover:shadow-gold transition-smooth border-0 group h-full">
+                    <div className="relative h-36 sm:h-40 md:h-48 overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                      />
+                      {!item.in_stock && (
+                        <div className="absolute top-2 right-2 md:top-3 md:right-3">
+                          <Badge className="bg-red-100 text-red-800 text-xs">Out of Stock</Badge>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </div>
 
-                <Button 
-                  className="w-full" 
-                  variant={product.inStock ? "default" : "outline"}
-                  disabled={!product.inStock}
-                >
-                  {product.inStock ? "Reserve Now" : "Notify When Available"}
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
+                    <div className="p-3 md:p-4">
+                      <h3 className="font-serif text-sm md:text-lg font-bold text-foreground mb-1 md:mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        {item.name}
+                      </h3>
+                      <p className="text-base md:text-xl font-bold text-primary mb-1 md:mb-2">
+                        {formatPrice(item.price)}
+                      </p>
+                      <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 md:line-clamp-3">
+                        {item.description}
+                      </p>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {/* Info Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-          <Card className="p-6 border-0 gradient-card shadow-elegant">
-            <h3 className="font-serif text-xl font-bold mb-3">How to Order</h3>
-            <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside">
-              <li>Click "Reserve Now" on your desired item(s)</li>
-              <li>Fill in your details and preferred size</li>
-              <li>Make payment via the provided options</li>
-              <li>Collect your order from the LSS office</li>
-            </ol>
-          </Card>
-
-          <Card className="p-6 border-0 gradient-card shadow-elegant">
-            <h3 className="font-serif text-xl font-bold mb-3">Payment Options</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Bank Transfer to LSS Account</li>
-              <li>• Payment on Collection (Cash)</li>
-              <li>• Online Payment (Coming Soon)</li>
-            </ul>
-            <p className="text-xs text-muted-foreground mt-4">
-              For bulk orders or custom designs, contact us at merch@lssbowen.edu.ng
+        {merchItems.length === 0 && (
+          <div className="text-center py-8 md:py-12">
+            <h3 className="text-lg md:text-xl font-semibold text-foreground mb-4">No Merchandise Available</h3>
+            <p className="text-muted-foreground px-4">
+              Check back later for new LSS branded items and accessories.
             </p>
-          </Card>
-        </div>
+          </div>
+        )}
 
-        {/* CTA */}
-        <Card className="mt-12 p-8 md:p-12 text-center gradient-hero text-primary-foreground shadow-elegant border-0">
-          <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4">
-            Want to Suggest New Merch?
+        {/* Newsletter CTA */}
+        <Card className="mt-8 md:mt-16 p-6 md:p-8 lg:p-12 text-center gradient-hero text-primary-foreground shadow-elegant border-0">
+          <h2 className="font-serif text-xl md:text-2xl lg:text-3xl font-bold mb-4">
+            Stay Updated
           </h2>
-          <p className="text-lg mb-6 max-w-2xl mx-auto opacity-90">
-            We'd love to hear your ideas for new merchandise items!
+          <p className="text-base md:text-lg mb-6 max-w-2xl mx-auto opacity-90 px-2">
+            Be the first to know about new merchandise drops and exclusive LSS items
           </p>
-          <Button variant="gold" size="lg">
-            Share Your Ideas
-          </Button>
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4 px-4 sm:px-0">
+            <Button variant="gold" size="lg" className="w-full sm:w-auto">
+              Notify Me of New Items
+            </Button>
+            <Button variant="outline" size="lg" className="bg-card/10 border-primary-foreground/20 hover:bg-card/20 w-full sm:w-auto">
+              View Size Guide
+            </Button>
+          </div>
         </Card>
       </div>
     </div>

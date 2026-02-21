@@ -1,5 +1,5 @@
 import { FormEvent, useMemo, useState } from "react";
-import { ShieldCheck, LogOut, Plus, Edit, Trash } from "lucide-react";
+import { ShieldCheck, LogOut, Plus, Edit, Trash, ArrowUp, ArrowDown } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -25,6 +25,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { ImageUpload } from "@/components/ImageUpload";
 import { PDFUpload } from "@/components/PDFUpload";
+import { SortableList } from "@/components/SortableList";
 import {
   useAdminData,
   Resource,
@@ -109,18 +110,22 @@ const Admin = () => {
     addExecutive,
     updateExecutive,
     deleteExecutive,
+    reorderExecutives,
     alumni,
     addAlumni,
     updateAlumni,
     deleteAlumni,
+    reorderAlumni,
     merchItems,
     addMerchItem,
     updateMerchItem,
     deleteMerchItem,
+    reorderMerchItems,
     newsItems,
     addNewsItem,
     updateNewsItem,
     deleteNewsItem,
+    reorderNewsItems,
   } = useAdminData();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [credentials, setCredentials] = useState({ email: "", password: "" });
@@ -130,6 +135,14 @@ const Admin = () => {
   const [alumniForm, setAlumniForm] = useState<AlumniFormState>(() => createAlumniFormState());
   const [merchForm, setMerchForm] = useState<MerchFormState>(() => createMerchFormState());
   const [newsForm, setNewsForm] = useState<NewsFormState>(() => createNewsFormState());
+  
+  // Reorder mode state for each section
+  const [reorderMode, setReorderMode] = useState({
+    executives: false,
+    alumni: false,
+    merch: false,
+    news: false,
+  });
 
   const totals = useMemo(
     () => ({
@@ -354,10 +367,10 @@ const Admin = () => {
       image: newsForm.image.trim(),
     };
 
-    if (!payload.title || !payload.summary || !payload.date || !payload.category || !payload.image) {
+    if (!payload.title || !payload.summary || !payload.content || !payload.date || !payload.category || !payload.image) {
       toast({
         title: "Incomplete news post",
-        description: "Please enter a title, category, summary, image URL, and published date.",
+        description: "Please enter a title, category, summary, image URL, content, and published date.",
         variant: "destructive",
       });
       return;
@@ -720,96 +733,60 @@ const Admin = () => {
                   <CardTitle className="flex items-center gap-2 text-2xl">
                     <Plus className="h-5 w-5 text-primary" /> {executiveForm.id ? "Update Executive" : "Add Executive"}
                   </CardTitle>
-                  <CardDescription>Maintain up-to-date executive committee profiles.</CardDescription>
+                  <CardDescription>Manage LSS executive team profiles and contact information</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form className="space-y-4" onSubmit={handleExecutiveSubmit}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="executive-name">Full name</Label>
-                        <Input
-                          id="executive-name"
-                          value={executiveForm.name}
-                          onChange={(event) => setExecutiveForm((prev) => ({ ...prev, name: event.target.value }))}
-                          placeholder="e.g. Oluwatobi Adeoye"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="executive-position">Position</Label>
-                        <Input
-                          id="executive-position"
-                          value={executiveForm.position}
-                          onChange={(event) => setExecutiveForm((prev) => ({ ...prev, position: event.target.value }))}
-                          placeholder="President"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="executive-email">Email</Label>
-                        <Input
-                          id="executive-email"
-                          type="email"
-                          value={executiveForm.email}
-                          onChange={(event) => setExecutiveForm((prev) => ({ ...prev, email: event.target.value }))}
-                          placeholder="president@lssbowen.com"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="executive-phone">Phone</Label>
-                        <Input
-                          id="executive-phone"
-                          value={executiveForm.phone}
-                          onChange={(event) => setExecutiveForm((prev) => ({ ...prev, phone: event.target.value }))}
-                          placeholder="+234 80 0000 0000"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <ImageUpload
-                          value={executiveForm.image}
-                          onChange={(url) => setExecutiveForm((prev) => ({ ...prev, image: url }))}
-                          placeholder="https://example.com/executive-photo.jpg"
-                          folder="executives"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label htmlFor="executive-bio">Bio</Label>
-                        <Textarea
-                          id="executive-bio"
-                          value={executiveForm.bio}
-                          onChange={(event) => setExecutiveForm((prev) => ({ ...prev, bio: event.target.value }))}
-                          placeholder="Brief description of role and responsibilities"
-                          rows={3}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="executive-linkedin">LinkedIn</Label>
-                        <Input
-                          id="executive-linkedin"
-                          value={executiveForm.linkedin}
-                          onChange={(event) => setExecutiveForm((prev) => ({ ...prev, linkedin: event.target.value }))}
-                          placeholder="https://linkedin.com/in/username"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="executive-instagram">Instagram</Label>
-                        <Input
-                          id="executive-instagram"
-                          value={executiveForm.instagram}
-                          onChange={(event) => setExecutiveForm((prev) => ({ ...prev, instagram: event.target.value }))}
-                          placeholder="https://instagram.com/username"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="executive-duration">Duration</Label>
-                        <Input
-                          id="executive-duration"
-                          value={executiveForm.duration}
-                          onChange={(event) => setExecutiveForm((prev) => ({ ...prev, duration: event.target.value }))}
-                          placeholder="2024/2025"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="executive-name">Full Name</Label>
+                      <Input
+                        id="executive-name"
+                        value={executiveForm.name}
+                        onChange={(event) => setExecutiveForm((prev) => ({ ...prev, name: event.target.value }))}
+                        placeholder="e.g. Chioma Adeleke"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="executive-position">Position</Label>
+                      <Input
+                        id="executive-position"
+                        value={executiveForm.position}
+                        onChange={(event) => setExecutiveForm((prev) => ({ ...prev, position: event.target.value }))}
+                        placeholder="e.g. President, Vice President, Secretary"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="executive-email">Email Address</Label>
+                      <Input
+                        id="executive-email"
+                        type="email"
+                        value={executiveForm.email}
+                        onChange={(event) => setExecutiveForm((prev) => ({ ...prev, email: event.target.value }))}
+                        placeholder="e.g. president@lssbowen.edu.ng"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="executive-phone">Phone Number</Label>
+                      <Input
+                        id="executive-phone"
+                        type="tel"
+                        value={executiveForm.phone}
+                        onChange={(event) => setExecutiveForm((prev) => ({ ...prev, phone: event.target.value }))}
+                        placeholder="e.g. +234 567 8900"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="executive-bio">Biography</Label>
+                      <Textarea
+                        id="executive-bio"
+                        value={executiveForm.bio}
+                        onChange={(event) => setExecutiveForm((prev) => ({ ...prev, bio: event.target.value }))}
+                        placeholder="Write a brief biography..."
+                        rows={4}
+                      />
                     </div>
                     <div className="flex items-center justify-end gap-3">
                       {executiveForm.id !== null && (
@@ -819,7 +796,7 @@ const Admin = () => {
                       )}
                       <Button type="submit" className="gap-2">
                         <Plus className="h-4 w-4" />
-                        {executiveForm.id !== null ? "Save changes" : "Add executive"}
+                        {executiveForm.id !== null ? "Save changes" : "Add Executive"}
                       </Button>
                     </div>
                   </form>
@@ -828,56 +805,80 @@ const Admin = () => {
 
               <Card className="border-0 shadow-elegant">
                 <CardHeader>
-                  <CardTitle className="text-2xl">Executive directory</CardTitle>
-                  <CardDescription>Currently managing {executives.length} executive profiles.</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-2xl">Executive Team</CardTitle>
+                      <CardDescription>Currently managing {executives.length} executives.</CardDescription>
+                    </div>
+                    {executives.length > 1 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setReorderMode(prev => ({ ...prev, executives: !prev.executives }))}
+                      >
+                        {reorderMode.executives ? "Done Reordering" : "Reorder Executives"}
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Position</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Phone</TableHead>
-                          <TableHead className="w-[120px]">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {executives.map((executive) => (
-                          <TableRow key={executive.id}>
-                            <TableCell className="font-medium">{executive.name}</TableCell>
-                            <TableCell>{executive.position}</TableCell>
-                            <TableCell>
-                              <a className="text-primary underline" href={`mailto:${executive.email}`}>
-                                {executive.email}
-                              </a>
-                            </TableCell>
-                            <TableCell>{executive.phone || <span className="text-muted-foreground">Not set</span>}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Button variant="outline" size="icon" onClick={() => handleEditExecutive(executive)}>
-                                  <Edit className="h-4 w-4" />
-                                  <span className="sr-only">Edit executive</span>
-                                </Button>
-                                <Button variant="destructive" size="icon" onClick={() => handleDeleteExecutive(executive.id)}>
-                                  <Trash className="h-4 w-4" />
-                                  <span className="sr-only">Delete executive</span>
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        {executives.length === 0 && (
+                  {reorderMode.executives ? (
+                    <SortableList
+                      items={executives.map(e => ({ id: e.id, name: e.name, position: e.position }))}
+                      onReorder={(orderedIds) => {
+                        reorderExecutives(orderedIds);
+                        toast({ title: "Order saved", description: "Executive display order has been updated." });
+                        setReorderMode(prev => ({ ...prev, executives: false }));
+                      }}
+                      renderItem={(item) => (
+                        <div>
+                          <div className="font-medium">{item.name}</div>
+                          <div className="text-sm text-muted-foreground">{item.position}</div>
+                        </div>
+                      )}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
                           <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground">
-                              No executive profiles yet. Add the first profile using the form.
-                            </TableCell>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Position</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Phone</TableHead>
+                            <TableHead className="w-[120px]">Actions</TableHead>
                           </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
+                        </TableHeader>
+                        <TableBody>
+                          {executives.map((executive) => (
+                            <TableRow key={executive.id}>
+                              <TableCell className="font-medium">{executive.name}</TableCell>
+                              <TableCell>{executive.position}</TableCell>
+                              <TableCell>{executive.email}</TableCell>
+                              <TableCell>{executive.phone || '-'}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline" size="icon" onClick={() => handleEditExecutive(executive)}>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="destructive" size="icon" onClick={() => handleDeleteExecutive(executive.id)}>
+                                    <Trash className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                          {executives.length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center text-muted-foreground">
+                                No executives yet. Add an executive using the form.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -915,23 +916,33 @@ const Admin = () => {
                           required
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="alumni-location">Location</Label>
-                        <Input
-                          id="alumni-location"
-                          value={alumniForm.location}
-                          onChange={(event) => setAlumniForm((prev) => ({ ...prev, location: event.target.value }))}
-                          placeholder="Lagos, Nigeria"
-                        />
-                      </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="alumni-role">Current role</Label>
+                      <Label htmlFor="alumni-position">Current position</Label>
                       <Input
-                        id="alumni-role"
-                        value={alumniForm.currentRole}
-                        onChange={(event) => setAlumniForm((prev) => ({ ...prev, currentRole: event.target.value }))}
+                        id="alumni-position"
+                        value={alumniForm.current_position}
+                        onChange={(event) => setAlumniForm((prev) => ({ ...prev, current_position: event.target.value }))}
                         placeholder="Associate, Lagos Law Chambers"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="alumni-specialization">Specialization</Label>
+                      <Input
+                        id="alumni-specialization"
+                        value={alumniForm.specialization}
+                        onChange={(event) => setAlumniForm((prev) => ({ ...prev, specialization: event.target.value }))}
+                        placeholder="e.g. Corporate Law"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="alumni-achievements">Achievements</Label>
+                      <Textarea
+                        id="alumni-achievements"
+                        value={alumniForm.achievements}
+                        onChange={(event) => setAlumniForm((prev) => ({ ...prev, achievements: event.target.value }))}
+                        placeholder="Notable achievements and contributions..."
+                        rows={4}
                       />
                     </div>
                     <div className="flex items-center justify-end gap-3">
@@ -951,54 +962,84 @@ const Admin = () => {
 
               <Card className="border-0 shadow-elegant">
                 <CardHeader>
-                  <CardTitle className="text-2xl">Alumni spotlight</CardTitle>
-                  <CardDescription>Currently managing {alumni.length} alumni records.</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-2xl">Alumni spotlight</CardTitle>
+                      <CardDescription>Currently managing {alumni.length} alumni records.</CardDescription>
+                    </div>
+                    {alumni.length > 1 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setReorderMode(prev => ({ ...prev, alumni: !prev.alumni }))}
+                      >
+                        {reorderMode.alumni ? "Done Reordering" : "Reorder Alumni"}
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Graduation year</TableHead>
-                          <TableHead>Current position</TableHead>
-                          <TableHead>Specialization</TableHead>
-                          <TableHead className="w-[120px]">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {alumni.map((record) => (
-                          <TableRow key={record.id}>
-                            <TableCell className="font-medium">{record.name}</TableCell>
-                            <TableCell>{record.graduation_year}</TableCell>
-                            <TableCell className="max-w-[220px] truncate" title={record.current_position}>
-                              {record.current_position || <span className="text-muted-foreground">Not set</span>}
-                            </TableCell>
-                            <TableCell>{record.specialization || <span className="text-muted-foreground">Not set</span>}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Button variant="outline" size="icon" onClick={() => handleEditAlumni(record)}>
-                                  <Edit className="h-4 w-4" />
-                                  <span className="sr-only">Edit alumni</span>
-                                </Button>
-                                <Button variant="destructive" size="icon" onClick={() => handleDeleteAlumni(record.id)}>
-                                  <Trash className="h-4 w-4" />
-                                  <span className="sr-only">Delete alumni</span>
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        {alumni.length === 0 && (
+                  {reorderMode.alumni ? (
+                    <SortableList
+                      items={alumni.map(a => ({ id: a.id, name: a.name, position: a.current_position }))}
+                      onReorder={(orderedIds) => {
+                        reorderAlumni(orderedIds);
+                        toast({ title: "Order saved", description: "Alumni display order has been updated." });
+                        setReorderMode(prev => ({ ...prev, alumni: false }));
+                      }}
+                      renderItem={(item) => (
+                        <div>
+                          <div className="font-medium">{item.name}</div>
+                          <div className="text-sm text-muted-foreground">{item.position}</div>
+                        </div>
+                      )}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
                           <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground">
-                              No alumni profiles yet. Add a record using the form.
-                            </TableCell>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Graduation year</TableHead>
+                            <TableHead>Current position</TableHead>
+                            <TableHead>Specialization</TableHead>
+                            <TableHead className="w-[120px]">Actions</TableHead>
                           </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
+                        </TableHeader>
+                        <TableBody>
+                          {alumni.map((record) => (
+                            <TableRow key={record.id}>
+                              <TableCell className="font-medium">{record.name}</TableCell>
+                              <TableCell>{record.graduation_year}</TableCell>
+                              <TableCell className="max-w-[220px] truncate" title={record.current_position}>
+                                {record.current_position || <span className="text-muted-foreground">Not set</span>}
+                              </TableCell>
+                              <TableCell>{record.specialization || <span className="text-muted-foreground">Not set</span>}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline" size="icon" onClick={() => handleEditAlumni(record)}>
+                                    <Edit className="h-4 w-4" />
+                                    <span className="sr-only">Edit alumni</span>
+                                  </Button>
+                                  <Button variant="destructive" size="icon" onClick={() => handleDeleteAlumni(record.id)}>
+                                    <Trash className="h-4 w-4" />
+                                    <span className="sr-only">Delete alumni</span>
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                          {alumni.length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center text-muted-foreground">
+                                No alumni profiles yet. Add a record using the form.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -1036,26 +1077,51 @@ const Admin = () => {
                         required
                       />
                     </div>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="news-date">Published date</Label>
-                        <Input
-                          id="news-date"
-                          type="date"
-                          value={newsForm.publishedOn}
-                          onChange={(event) => setNewsForm((prev) => ({ ...prev, publishedOn: event.target.value }))}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="news-link">External link</Label>
-                        <Input
-                          id="news-link"
-                          value={newsForm.link}
-                          onChange={(event) => setNewsForm((prev) => ({ ...prev, link: event.target.value }))}
-                          placeholder="https://..."
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="news-date">Published date</Label>
+                      <Input
+                        id="news-date"
+                        type="date"
+                        value={newsForm.date}
+                        onChange={(event) => setNewsForm((prev) => ({ ...prev, date: event.target.value }))}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="news-category">Category</Label>
+                      <select
+                        id="news-category"
+                        value={newsForm.category}
+                        onChange={(event) => setNewsForm((prev) => ({ ...prev, category: event.target.value }))}
+                        className="w-full p-2 border border-border rounded-md bg-background"
+                        required
+                      >
+                        <option value="">Select category</option>
+                        <option value="Academic">Academic</option>
+                        <option value="Event">Event</option>
+                        <option value="Opportunity">Opportunity</option>
+                        <option value="Announcement">Announcement</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="news-image">News Image</Label>
+                      <ImageUpload
+                        value={newsForm.image}
+                        onChange={(url) => setNewsForm((prev) => ({ ...prev, image: url }))}
+                        folder="news"
+                        aspectRatio="16:9"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="news-content">Full Content</Label>
+                      <Textarea
+                        id="news-content"
+                        value={newsForm.content}
+                        onChange={(event) => setNewsForm((prev) => ({ ...prev, content: event.target.value }))}
+                        placeholder="Write the full news article content..."
+                        rows={8}
+                        required
+                      />
                     </div>
                     <div className="flex items-center justify-end gap-3">
                       {newsForm.id !== null && (
@@ -1074,54 +1140,84 @@ const Admin = () => {
 
               <Card className="border-0 shadow-elegant">
                 <CardHeader>
-                  <CardTitle className="text-2xl">News feed</CardTitle>
-                  <CardDescription>Currently managing {newsItems.length} news posts.</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-2xl">News feed</CardTitle>
+                      <CardDescription>Currently managing {newsItems.length} news posts.</CardDescription>
+                    </div>
+                    {newsItems.length > 1 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setReorderMode(prev => ({ ...prev, news: !prev.news }))}
+                      >
+                        {reorderMode.news ? "Done Reordering" : "Reorder News"}
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Title</TableHead>
-                          <TableHead>Published</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Summary</TableHead>
-                          <TableHead className="w-[120px]">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {newsItems.map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell className="font-medium">{item.title}</TableCell>
-                            <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
-                            <TableCell>{item.category}</TableCell>
-                            <TableCell className="max-w-[260px] truncate" title={item.summary}>
-                              {item.summary}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Button variant="outline" size="icon" onClick={() => handleEditNews(item)}>
-                                  <Edit className="h-4 w-4" />
-                                  <span className="sr-only">Edit news</span>
-                                </Button>
-                                <Button variant="destructive" size="icon" onClick={() => handleDeleteNews(item.id)}>
-                                  <Trash className="h-4 w-4" />
-                                  <span className="sr-only">Delete news</span>
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        {newsItems.length === 0 && (
+                  {reorderMode.news ? (
+                    <SortableList
+                      items={newsItems.map(n => ({ id: n.id, name: n.title, position: n.category }))}
+                      onReorder={(orderedIds) => {
+                        reorderNewsItems(orderedIds);
+                        toast({ title: "Order saved", description: "News display order has been updated." });
+                        setReorderMode(prev => ({ ...prev, news: false }));
+                      }}
+                      renderItem={(item) => (
+                        <div>
+                          <div className="font-medium">{item.name}</div>
+                          <div className="text-sm text-muted-foreground">{item.position}</div>
+                        </div>
+                      )}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
                           <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground">
-                              No news posts yet. Publish a news update using the form.
-                            </TableCell>
+                            <TableHead>Title</TableHead>
+                            <TableHead>Published</TableHead>
+                            <TableHead>Category</TableHead>
+                            <TableHead>Summary</TableHead>
+                            <TableHead className="w-[120px]">Actions</TableHead>
                           </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
+                        </TableHeader>
+                        <TableBody>
+                          {newsItems.map((item) => (
+                            <TableRow key={item.id}>
+                              <TableCell className="font-medium">{item.title}</TableCell>
+                              <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
+                              <TableCell>{item.category}</TableCell>
+                              <TableCell className="max-w-[260px] truncate" title={item.summary}>
+                                {item.summary}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline" size="icon" onClick={() => handleEditNews(item)}>
+                                    <Edit className="h-4 w-4" />
+                                    <span className="sr-only">Edit news</span>
+                                  </Button>
+                                  <Button variant="destructive" size="icon" onClick={() => handleDeleteNews(item.id)}>
+                                    <Trash className="h-4 w-4" />
+                                    <span className="sr-only">Delete news</span>
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                          {newsItems.length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center text-muted-foreground">
+                                No news posts yet. Publish a news update using the form.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -1219,60 +1315,90 @@ const Admin = () => {
 
               <Card className="border-0 shadow-elegant">
                 <CardHeader>
-                  <CardTitle className="text-2xl">Merch catalogue</CardTitle>
-                  <CardDescription>Currently managing {merchItems.length} merch items.</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-2xl">Merch catalogue</CardTitle>
+                      <CardDescription>Currently managing {merchItems.length} merch items.</CardDescription>
+                    </div>
+                    {merchItems.length > 1 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setReorderMode(prev => ({ ...prev, merch: !prev.merch }))}
+                      >
+                        {reorderMode.merch ? "Done Reordering" : "Reorder Merch"}
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Price</TableHead>
-                          <TableHead>Stock status</TableHead>
-                          <TableHead>Sizes</TableHead>
-                          <TableHead className="w-[120px]">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {merchItems.map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell className="font-medium">{item.name}</TableCell>
-                            <TableCell>{item.price}</TableCell>
-                            <TableCell>
-                              {item.inStock ? (
-                                <span className="text-sm font-medium text-green-600">In stock</span>
-                              ) : (
-                                <span className="text-sm font-medium text-destructive">Out of stock</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="max-w-[200px]">
-                              {item.sizes.length > 0 ? item.sizes.join(", ") : <span className="text-muted-foreground">Not set</span>}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Button variant="outline" size="icon" onClick={() => handleEditMerch(item)}>
-                                  <Edit className="h-4 w-4" />
-                                  <span className="sr-only">Edit merch</span>
-                                </Button>
-                                <Button variant="destructive" size="icon" onClick={() => handleDeleteMerch(item.id)}>
-                                  <Trash className="h-4 w-4" />
-                                  <span className="sr-only">Delete merch</span>
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        {merchItems.length === 0 && (
+                  {reorderMode.merch ? (
+                    <SortableList
+                      items={merchItems.map(m => ({ id: m.id, name: m.name, position: `₦${m.price}` }))}
+                      onReorder={(orderedIds) => {
+                        reorderMerchItems(orderedIds);
+                        toast({ title: "Order saved", description: "Merch display order has been updated." });
+                        setReorderMode(prev => ({ ...prev, merch: false }));
+                      }}
+                      renderItem={(item) => (
+                        <div>
+                          <div className="font-medium">{item.name}</div>
+                          <div className="text-sm text-muted-foreground">{item.position}</div>
+                        </div>
+                      )}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
                           <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground">
-                              No merch items yet. Add merchandise using the form.
-                            </TableCell>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Price</TableHead>
+                            <TableHead>Stock status</TableHead>
+                            <TableHead>Sizes</TableHead>
+                            <TableHead className="w-[120px]">Actions</TableHead>
                           </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
+                        </TableHeader>
+                        <TableBody>
+                          {merchItems.map((item) => (
+                            <TableRow key={item.id}>
+                              <TableCell className="font-medium">{item.name}</TableCell>
+                              <TableCell>{item.price}</TableCell>
+                              <TableCell>
+                                {item.inStock ? (
+                                  <span className="text-sm font-medium text-green-600">In stock</span>
+                                ) : (
+                                  <span className="text-sm font-medium text-destructive">Out of stock</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="max-w-[200px]">
+                                {item.sizes.length > 0 ? item.sizes.join(", ") : <span className="text-muted-foreground">Not set</span>}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline" size="icon" onClick={() => handleEditMerch(item)}>
+                                    <Edit className="h-4 w-4" />
+                                    <span className="sr-only">Edit merch</span>
+                                  </Button>
+                                  <Button variant="destructive" size="icon" onClick={() => handleDeleteMerch(item.id)}>
+                                    <Trash className="h-4 w-4" />
+                                    <span className="sr-only">Delete merch</span>
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                          {merchItems.length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center text-muted-foreground">
+                                No merch items yet. Add merchandise using the form.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

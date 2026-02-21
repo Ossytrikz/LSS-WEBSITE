@@ -4,15 +4,19 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AdminDataProvider } from "@/context/AdminDataContextSupabase";
+import { BackToTop } from "@/components/BackToTop";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Resources from "./pages/Resources";
 import Executives from "./pages/Executives";
 import Alumni from "./pages/Alumni";
+import AlumniProfile from "./pages/AlumniProfile";
 import Merch from "./pages/Merch";
+import MerchItem from "./pages/MerchItem";
 import Feedback from "./pages/Feedback";
 import News from "./pages/News";
+import NewsArticle from "./pages/NewsArticle";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
@@ -34,9 +38,12 @@ const App = () => (
                 <Route path="/resources" element={<Resources />} />
                 <Route path="/executives" element={<Executives />} />
                 <Route path="/alumni" element={<Alumni />} />
+                <Route path="/alumni/:id" element={<AlumniProfile />} />
                 <Route path="/merch" element={<Merch />} />
+                <Route path="/merch/:id" element={<MerchItem />} />
                 <Route path="/feedback" element={<Feedback />} />
                 <Route path="/news" element={<News />} />
+                <Route path="/news/:id" element={<NewsArticle />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/admin" element={<Admin />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -48,6 +55,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+    <BackToTop />
   </AdminDataProvider>
 );
 

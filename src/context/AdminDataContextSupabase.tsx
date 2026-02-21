@@ -22,6 +22,7 @@ export type Executive = {
   linkedin: string | null;
   instagram: string | null;
   duration: string | null;
+  display_order: number;
 };
 
 export type Alumni = {
@@ -32,6 +33,7 @@ export type Alumni = {
   current_position: string;
   achievements: string;
   specialization: string;
+  display_order: number;
 };
 
 export type MerchItem = {
@@ -42,6 +44,7 @@ export type MerchItem = {
   sizes: string[];
   description: string;
   in_stock: boolean;
+  display_order: number;
 };
 
 export type NewsItem = {
@@ -52,6 +55,7 @@ export type NewsItem = {
   image: string;
   summary: string;
   content: string;
+  display_order: number;
 };
 
 export type ResourceInput = Omit<Resource, "id">;
@@ -77,18 +81,24 @@ type AdminDataContextValue = {
   addExecutive: (executive: ExecutiveInput) => Promise<Executive>;
   updateExecutive: (executive: Executive) => Promise<Executive>;
   deleteExecutive: (id: number) => Promise<void>;
+  reorderExecutives: (orderedIds: number[]) => Promise<void>;
 
   addAlumni: (alumni: AlumniInput) => Promise<Alumni>;
   updateAlumni: (alumni: Alumni) => Promise<Alumni>;
   deleteAlumni: (id: number) => Promise<void>;
+  reorderAlumni: (orderedIds: number[]) => Promise<void>;
 
   addMerchItem: (item: MerchInput) => Promise<MerchItem>;
   updateMerchItem: (item: MerchItem) => Promise<MerchItem>;
   deleteMerchItem: (id: number) => Promise<void>;
+  reorderMerchItems: (orderedIds: number[]) => Promise<void>;
 
   addNewsItem: (item: NewsInput) => Promise<NewsItem>;
   updateNewsItem: (item: NewsItem) => Promise<NewsItem>;
   deleteNewsItem: (id: number) => Promise<void>;
+  reorderNewsItems: (orderedIds: number[]) => Promise<void>;
+  loading: boolean;
+  error: string | null;
 };
 
 const AdminDataContext = createContext<AdminDataContextValue | undefined>(undefined);
@@ -99,21 +109,39 @@ export const AdminDataProvider = ({ children }: { children: ReactNode }) => {
   const [alumni, setAlumni] = useState<Alumni[]>([]);
   const [merchItems, setMerchItems] = useState<MerchItem[]>([]);
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Load initial data from Supabase
   useEffect(() => {
     const loadData = async () => {
       try {
+        console.log('🔄 Loading data from Supabase...');
         setIsRefreshing(true);
         
         const [resourcesRes, executivesRes, alumniRes, merchRes, newsRes] = await Promise.all([
           supabase.from('resources').select('*').order('id'),
-          supabase.from('executives').select('*').order('id'),
-          supabase.from('alumni').select('*').order('id'),
-          supabase.from('merch_items').select('*').order('id'),
-          supabase.from('news_items').select('*').order('id')
+          supabase.from('executives').select('*').order('display_order', { ascending: true }),
+          supabase.from('alumni').select('*').order('display_order', { ascending: true }),
+          supabase.from('merch_items').select('*').order('display_order', { ascending: true }),
+          supabase.from('news_items').select('*').order('display_order', { ascending: true })
         ]);
+
+        console.log('📊 Supabase responses:', {
+          resources: resourcesRes.data?.length || 0,
+          executives: executivesRes.data?.length || 0,
+          alumni: alumniRes.data?.length || 0,
+          merch: merchRes.data?.length || 0,
+          news: newsRes.data?.length || 0,
+          errors: {
+            resources: resourcesRes.error,
+            executives: executivesRes.error,
+            alumni: alumniRes.error,
+            merch: merchRes.error,
+            news: newsRes.error
+          }
+        });
 
         if (resourcesRes.error) throw resourcesRes.error;
         if (executivesRes.error) throw executivesRes.error;
@@ -126,10 +154,14 @@ export const AdminDataProvider = ({ children }: { children: ReactNode }) => {
         setAlumni(alumniRes.data || []);
         setMerchItems(merchRes.data || []);
         setNewsItems(newsRes.data || []);
+        
+        console.log('✅ Data loaded successfully');
       } catch (error) {
-        console.error('Failed to load data:', error);
+        console.error('❌ Failed to load data:', error);
+        setError(error.message);
       } finally {
         setIsRefreshing(false);
+        setLoading(false);
       }
     };
 
@@ -205,6 +237,32 @@ export const AdminDataProvider = ({ children }: { children: ReactNode }) => {
       setExecutives((prev) => prev.filter((item) => item.id !== id));
     },
 
+    reorderExecutives: async (orderedIds: number[]) => {
+      // Update display_order for each executive
+      const updates = orderedIds.map((id, index) => ({
+        id,
+        display_order: index + 1
+      }));
+      
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('executives')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id);
+        
+        if (error) throw error;
+      }
+      
+      // Refresh the list
+      const { data, error } = await supabase
+        .from('executives')
+        .select('*')
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      setExecutives(data || []);
+    },
+
     alumni,
     addAlumni: async (record) => {
       const { data, error } = await supabase
@@ -237,6 +295,30 @@ export const AdminDataProvider = ({ children }: { children: ReactNode }) => {
       
       if (error) throw error;
       setAlumni((prev) => prev.filter((item) => item.id !== id));
+    },
+
+    reorderAlumni: async (orderedIds: number[]) => {
+      const updates = orderedIds.map((id, index) => ({
+        id,
+        display_order: index + 1
+      }));
+      
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('alumni')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id);
+        
+        if (error) throw error;
+      }
+      
+      const { data, error } = await supabase
+        .from('alumni')
+        .select('*')
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      setAlumni(data || []);
     },
 
     merchItems,
@@ -273,6 +355,30 @@ export const AdminDataProvider = ({ children }: { children: ReactNode }) => {
       setMerchItems((prev) => prev.filter((item) => item.id !== id));
     },
 
+    reorderMerchItems: async (orderedIds: number[]) => {
+      const updates = orderedIds.map((id, index) => ({
+        id,
+        display_order: index + 1
+      }));
+      
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('merch_items')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id);
+        
+        if (error) throw error;
+      }
+      
+      const { data, error } = await supabase
+        .from('merch_items')
+        .select('*')
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      setMerchItems(data || []);
+    },
+
     newsItems,
     addNewsItem: async (item) => {
       const { data, error } = await supabase
@@ -307,6 +413,30 @@ export const AdminDataProvider = ({ children }: { children: ReactNode }) => {
       setNewsItems((prev) => prev.filter((item) => item.id !== id));
     },
 
+    reorderNewsItems: async (orderedIds: number[]) => {
+      const updates = orderedIds.map((id, index) => ({
+        id,
+        display_order: index + 1
+      }));
+      
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('news_items')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id);
+        
+        if (error) throw error;
+      }
+      
+      const { data, error } = await supabase
+        .from('news_items')
+        .select('*')
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      setNewsItems(data || []);
+    },
+
     backendEnabled: true,
     isRefreshing,
     refreshAll: async () => {
@@ -314,7 +444,9 @@ export const AdminDataProvider = ({ children }: { children: ReactNode }) => {
       setIsRefreshing(true);
       setTimeout(() => setIsRefreshing(false), 1000);
     },
-  }), [resources, executives, alumni, merchItems, newsItems, isRefreshing]);
+    loading,
+    error,
+  }), [resources, executives, alumni, merchItems, newsItems, isRefreshing, loading, error]);
 
   return <AdminDataContext.Provider value={value}>{children}</AdminDataContext.Provider>;
 };
