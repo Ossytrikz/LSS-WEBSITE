@@ -788,6 +788,14 @@ const Admin = () => {
                         rows={4}
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label>Profile Image</Label>
+                      <ImageUpload
+                        value={executiveForm.image}
+                        onChange={(url) => setExecutiveForm((prev) => ({ ...prev, image: url }))}
+                        placeholder="Upload executive profile image"
+                      />
+                    </div>
                     <div className="flex items-center justify-end gap-3">
                       {executiveForm.id !== null && (
                         <Button type="button" variant="ghost" onClick={resetExecutiveForm}>
@@ -943,6 +951,14 @@ const Admin = () => {
                         onChange={(event) => setAlumniForm((prev) => ({ ...prev, achievements: event.target.value }))}
                         placeholder="Notable achievements and contributions..."
                         rows={4}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Profile Image</Label>
+                      <ImageUpload
+                        value={alumniForm.image}
+                        onChange={(url) => setAlumniForm((prev) => ({ ...prev, image: url }))}
+                        placeholder="Upload alumni profile image"
                       />
                     </div>
                     <div className="flex items-center justify-end gap-3">
@@ -1266,13 +1282,11 @@ const Admin = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="merch-image">Image URL</Label>
-                      <Input
-                        id="merch-image"
+                      <Label>Product Image</Label>
+                      <ImageUpload
                         value={merchForm.image}
-                        onChange={(event) => setMerchForm((prev) => ({ ...prev, image: event.target.value }))}
-                        placeholder="https://..."
-                        required
+                        onChange={(url) => setMerchForm((prev) => ({ ...prev, image: url }))}
+                        placeholder="Upload merch product image"
                       />
                     </div>
                     <div className="space-y-2">
