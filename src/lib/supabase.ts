@@ -33,6 +33,27 @@ export const uploadImage = async (file: File, path: string) => {
   return publicUrl;
 };
 
+// Upload any file to Supabase Storage
+export const uploadFile = async (file: File, folder: string = 'general'): Promise<string> => {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+  const filePath = `${folder}/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('lss-images')
+    .upload(filePath, file);
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const { data } = supabase.storage
+    .from('lss-images')
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+};
+
 // Delete image helper
 export const deleteImage = async (url: string) => {
   // Extract file path from URL

@@ -119,12 +119,16 @@ const Resources = () => {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Uploaded:</span>
                     <span className="font-medium">
-                      {new Date(resource.uploadDate).toLocaleDateString()}
+                      {new Date(resource.upload_date).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
 
-                <Button className="w-full" variant="default">
+                <Button 
+                  className="w-full" 
+                  variant="default"
+                  onClick={() => window.open(resource.link, '_blank')}
+                >
                   <Download className="mr-2 h-4 w-4" />
                   Download
                 </Button>

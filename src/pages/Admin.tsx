@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { ImageUpload } from "@/components/ImageUpload";
+import { PDFUpload } from "@/components/PDFUpload";
 import {
   useAdminData,
   Resource,
@@ -187,10 +188,10 @@ const Admin = () => {
       level: resourceForm.level.trim(),
       type: resourceForm.type.trim(),
       link: resourceForm.link.trim(),
-      uploadDate: resourceForm.uploadDate,
+      upload_date: resourceForm.upload_date,
     };
 
-    if (!payload.title || !payload.course || !payload.level || !payload.type || !payload.uploadDate) {
+    if (!payload.title || !payload.course || !payload.level || !payload.type || !payload.upload_date) {
       toast({
         title: "Incomplete resource",
         description: "Please fill in all required resource fields.",
@@ -613,19 +614,18 @@ const Admin = () => {
                         <Input
                           id="resource-date"
                           type="date"
-                          value={resourceForm.uploadDate}
-                          onChange={(event) => setResourceForm((prev) => ({ ...prev, uploadDate: event.target.value }))}
+                          value={resourceForm.upload_date}
+                          onChange={(event) => setResourceForm((prev) => ({ ...prev, upload_date: event.target.value }))}
                           required
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="resource-link">Resource link</Label>
-                      <Input
-                        id="resource-link"
+                      <PDFUpload
                         value={resourceForm.link}
-                        onChange={(event) => setResourceForm((prev) => ({ ...prev, link: event.target.value }))}
+                        onChange={(url) => setResourceForm((prev) => ({ ...prev, link: url }))}
                         placeholder="https://drive.google.com/..."
+                        folder="resources"
                       />
                     </div>
                     <div className="flex items-center justify-end gap-3">
