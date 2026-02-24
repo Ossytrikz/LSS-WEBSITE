@@ -92,6 +92,11 @@ const Home = () => {
     { icon: Heart, position: "top-16 right-4 md:right-32", delay: "animation-delay-2500", size: "h-6 w-6 md:h-8 md:w-8" },
   ];
 
+  const floatingTextElements = [
+    { text: "New Era", position: "top-1/3 left-1/4 md:left-1/3", delay: "animation-delay-3000", size: "text-2xl md:text-3xl" },
+    { text: "Excellence", position: "top-1/2 right-1/4 md:right-1/3", delay: "animation-delay-3500", size: "text-xl md:text-2xl" },
+  ];
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background Elements */}
@@ -115,6 +120,18 @@ const Home = () => {
             </div>
           );
         })}
+        
+        {/* Floating text elements */}
+        {floatingTextElements.map((element, index) => (
+          <div
+            key={`text-${index}`}
+            className={`absolute ${element.position} ${element.delay} animate-float-slow`}
+          >
+            <div className={`${element.size} font-bold bg-gradient-to-r from-yellow-300/15 to-orange-300/15 bg-clip-text text-transparent animate-pulse`}>
+              {element.text}
+            </div>
+          </div>
+        ))}
         
         {/* Sparkle effects */}
         <div className="absolute top-1/4 left-1/4 animate-sparkle">
@@ -172,6 +189,23 @@ const Home = () => {
               Bowen University
             </h2>
             <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 md:w-32 h-0.5 bg-gradient-to-r from-transparent via-yellow-300 to-transparent animate-pulse" />
+          </div>
+          
+          {/* New Era Badge */}
+          <div className="mb-6 md:mb-8 animate-in fade-in slide-in-from-bottom-7 duration-1000 delay-300">
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 border border-yellow-400/30 rounded-full backdrop-blur-sm">
+              <div className="relative">
+                <Sparkles className="h-5 w-5 text-yellow-300 animate-pulse" />
+                <div className="absolute inset-0 bg-yellow-300/20 blur-md animate-pulse" />
+              </div>
+              <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                #NewEra
+              </span>
+              <div className="relative">
+                <Sparkles className="h-5 w-5 text-orange-300 animate-pulse" />
+                <div className="absolute inset-0 bg-orange-300/20 blur-md animate-pulse" />
+              </div>
+            </div>
           </div>
           <p className="text-base sm:text-lg md:text-xl text-white/90 mb-8 md:mb-12 max-w-4xl mx-auto px-2 sm:px-4 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-400 leading-relaxed">
             Empowering future legal professionals through academic excellence, community service, and professional development
