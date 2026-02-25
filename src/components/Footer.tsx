@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin, Instagram, Twitter, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
-import lssLogo from "@/assets/lss-logo.png";
+import lssLogo from "@/assets/new-logo.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -12,10 +12,10 @@ const Footer = () => {
           {/* About Section */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <img src={lssLogo} alt="LSS Logo" className="h-12 w-12" />
+              <img src={lssLogo} alt="LSS Logo" className="h-14 w-14 md:h-16 md:w-16 object-cover" />
               <div>
-                <h3 className="font-serif text-xl font-bold text-primary">LSS Bowen University</h3>
-                <p className="text-sm text-muted-foreground">Law Students' Society</p>
+                <h3 className="font-serif text-xl md:text-2xl font-bold text-primary transition-colors duration-300 hover:text-primary/80">LSS Bowen University</h3>
+                <p className="text-sm text-muted-foreground transition-colors duration-300 hover:text-foreground/80">Law Students' Society</p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground mb-4 max-w-md">

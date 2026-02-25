@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Scale, BookOpen, Users, GraduationCap, ShoppingBag, MessageSquare, Megaphone, Settings, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import lssLogo from "@/assets/lss-logo.png";
+import lssLogo from "@/assets/new-logo.png";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,15 +29,12 @@ const Header = () => {
           {/* Logo */}
           <Link
             to="/"
-            className="group flex items-center gap-3 rounded-full px-2 py-1 transition-bounce hover:bg-primary/5"
+            className="group flex items-center gap-3 px-3 py-2 transition-all duration-300 hover:bg-primary/5 hover:scale-105"
           >
-            <div className="relative">
-              <span className="absolute inset-0 rounded-full bg-primary/20 blur-md transition-smooth group-hover:opacity-80" />
-              <img src={lssLogo} alt="LSS Logo" className="relative h-10 w-10 rounded-full border border-primary/20" />
-            </div>
+            <img src={lssLogo} alt="LSS Logo" className="h-12 w-12 md:h-14 md:w-14 object-cover transition-transform duration-300 group-hover:scale-110" />
             <div className="hidden sm:block text-left">
-              <div className="font-display text-lg font-semibold leading-tight tracking-tight text-primary">LSS</div>
-              <div className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Bowen University</div>
+              <div className="font-display text-lg md:text-xl font-bold leading-tight tracking-tight text-primary transition-colors duration-300 group-hover:text-primary/80">LSS</div>
+              <div className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground transition-colors duration-300 group-hover:text-foreground/80">Bowen University</div>
             </div>
           </Link>
 
