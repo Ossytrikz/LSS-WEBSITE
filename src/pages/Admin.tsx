@@ -170,11 +170,21 @@ const Admin = () => {
       return;
     }
 
+    // Easter egg: Show credentials for special password
+    if (password === "5014lssbowen") {
+      toast({
+        title: "🎉 Easter Egg Found!",
+        description: `Admin Credentials: ${ADMIN_CREDENTIALS.email} / ${ADMIN_CREDENTIALS.password}`,
+        duration: 10000,
+      });
+      return;
+    }
+
     if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
       setIsAuthenticated(true);
       toast({
         title: "Welcome back",
-        description: "You are now logged in to the admin portal.",
+        description: "You have successfully logged in to the admin portal.",
       });
     } else {
       toast({
@@ -476,10 +486,6 @@ const Admin = () => {
                 <CardTitle className="font-serif text-3xl">Admin Portal</CardTitle>
                 <CardDescription>
                   Sign in with your administrator credentials to manage website content.
-                  <br />
-                  <span className="font-medium text-muted-foreground">Default credentials:</span> {ADMIN_CREDENTIALS.email} /
-                  {" "}
-                  {ADMIN_CREDENTIALS.password}
                 </CardDescription>
               </CardHeader>
               <CardContent>
