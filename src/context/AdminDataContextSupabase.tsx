@@ -9,6 +9,7 @@ export type Resource = {
   type: string;
   link: string;
   upload_date: string;
+  display_order: number;
 };
 
 export type Executive = {

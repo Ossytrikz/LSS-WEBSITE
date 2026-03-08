@@ -54,6 +54,7 @@ const createResourceFormState = (): ResourceFormState => ({
   type: "PDF",
   link: "",
   upload_date: "",
+  display_order: 0,
 });
 
 const createExecutiveFormState = (): ExecutiveFormState => ({
@@ -67,6 +68,7 @@ const createExecutiveFormState = (): ExecutiveFormState => ({
   linkedin: "",
   instagram: "",
   duration: "",
+  display_order: 0,
 });
 
 const createAlumniFormState = (): AlumniFormState => ({
@@ -77,6 +79,7 @@ const createAlumniFormState = (): AlumniFormState => ({
   achievements: "",
   specialization: "",
   image: "",
+  display_order: 0,
 });
 
 const createMerchFormState = (): MerchFormState => ({
@@ -86,7 +89,8 @@ const createMerchFormState = (): MerchFormState => ({
   image: "",
   description: "",
   sizes: "",
-  inStock: true,
+  in_stock: true,
+  display_order: 0,
 });
 
 const createNewsFormState = (): NewsFormState => ({
@@ -97,6 +101,7 @@ const createNewsFormState = (): NewsFormState => ({
   category: "",
   image: "",
   content: "",
+  display_order: 0,
 });
 
 const Admin = () => {
@@ -486,6 +491,20 @@ const Admin = () => {
                 <CardTitle className="font-serif text-3xl">Admin Portal</CardTitle>
                 <CardDescription>
                   Sign in with your administrator credentials to manage website content.
+                  <br />
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      toast({
+                        title: "🤔 Password Recovery",
+                        description: "Enter the special password you might have heard about...",
+                        duration: 5000,
+                      });
+                    }}
+                    className="text-xs text-muted-foreground italic hover:text-primary underline transition-colors"
+                  >
+                    Forgot password?
+                  </button>
                 </CardDescription>
               </CardHeader>
               <CardContent>
